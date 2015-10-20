@@ -35,7 +35,7 @@ include.import({
 }, () => {
 	// define the module based on their export names
 	let mod_1 = imports('mod_1') // mod_1 is name given at export
-	let mod_2 = imports('mod_2') // same for mod_2 (see [how to export](https://github.com/Aelto/include.js/blob/master/README.md#how-to-export))
+	let mod_2 = imports('mod_2') // same for mod_2
 	
 	// call the module to test if everything is working as intended
 	mod_1()
