@@ -1,41 +1,52 @@
-'use strict'
-let include, imports
-imports = (file, name) => {
-	if (!name)
-		return include.exported[file]
-	return include.exported[file][name]
+let include, imports, exports
+{
+    // will store exported modules
+    let exported = {}
+
+    // adds the exported module to the modules list
+    exports = (name, value) => exported[name] = value
+
+    // returns the exported module
+    imports = name => exported[name]
+
+    include = config => new Promise((resolve, reject) => {
+        if (!config) reject('no config object supplied')
+
+        const baseUrl = config.baseUrl || './'
+        const tags = []
+
+        if (!config.sync) config.sync = []
+        config.sync.forEach(path => {
+            const tag = document.createElement('script')
+            tag.async = false
+            tag.src = baseUrl + path
+
+            tags.push(tag)
+        })
+
+        if (!config.async) config.async = []
+        config.async.forEach(path => {
+            const tag = document.createElement('script')
+            tag.src = baseUrl + path
+
+            tags.push(tag)
+        })
+
+        tags.forEach(tag => {
+            document.body.appendChild(tag)
+            tag.onload = () => {
+                // remove this module from the list
+                tags.splice(0, 1)
+
+                // no more modules to load
+                if (!tags.length) {
+                    if (config.after) {
+                        if (!config.after.baseUrl) config.after.baseUrl = baseUrl
+                        return include(config.after).then(() => resolve(config))
+                    }
+                    resolve(config)
+                }
+            }
+        })
+    })
 }
-include = ((es6) => {
-	es6.exported = {}
-	es6.import = (config, callback) => {
-		es6.config = config
-		if (!es6.config.baseUrl) es6.config.baseUrl = './'
-		es6.modules = []
-		
-		es6.config.include.forEach(p => es6.modules.push(es6.config.baseUrl + p))
-		
-		let tags = document.querySelectorAll('script'),
-			i = tags.length
-		while (i--)
-			if (tags.item(i).type === 'include')
-				es6.modules.push(tags.item(i).src)
-				
-		es6.modules.forEach((p, i) => es6.loadFile(p, i, callback))
-	}
-
-	es6.loadFile = (p, i, cb) => {
-		let u = document.createElement('script')
-        u.src = p
-        document.body.appendChild(u)
-
-        u.onload = () => {
-            es6.modules.splice(i, 1)
-            if (es6.modules.length === 0) cb()
-        }
-	}
-	
-	es6.newModule = (name, value) => include.exported[name] = value
-    es6.export = es6.exports = es6.newModule
-
-	return es6
-})({})
