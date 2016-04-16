@@ -16,42 +16,28 @@ now you can load your javascript file
 you can import using javascript
 ```javascript
 // main.js
-include.import({
+include({
     baseUrl: './',
-    include: [
-        'modules/mod_1.js' // the path will be './modules/mod_1.js'
-    ]
-}, () => {})
-```
-or using a script tag with type='include'. This method doesn't use the baseUrl given in the javascript
-```
-<script type="text/javascript" src='./modules/mod_2.js'>
-```
-the 2nd argument of include.import is a callback function. This function will be called after every files are fully loaded
-```javascript
-// main.js
-include.import({
-	// standard config object, see above...
-}, () => {
-	// define the module based on their export names
-	let mod_1 = imports('mod_1') // mod_1 is name given at export
-	let mod_2 = imports('mod_2') // same for mod_2
-	
-	// call the module to test if everything is working as intended
-	mod_1()
-	mod_2()
-	
-	// be happy :)
+    sync: ['test1.js', 'test2.js'],
+    async: ['test3.js'],
+    after: {
+        async: ['test4.js']
+    }
+}).then(v => {
+    console.log('done!')
+
+    const test = imports('test4')
+    test()
 })
 ```
 
 # How to export
-to export you'll have to use the include.export function (include.exports & include.newModule are also accepted).
-the first argument is the module's name, the second one is the content (can be a function, an object, an array, everything...)
+to export you'll have to use the exports function
+the first argument is the module's name, the second one is the value (can be a function, an object, an array, everything...)
 ```javascript
 // mod_1 is the name you'll use when importing it: let myMod = imports('mod_1')
-include.export('mod_1', () => {
-    console.log('i am module 1')
+exports('test4', () => {
+    console.log('from test4!')
 })
 ```
 
